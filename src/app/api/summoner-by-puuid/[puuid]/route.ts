@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
  * PUUID로 소환사 상세 정보 조회 (Server-side with caching)
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: { puuid: string } }
 ) {
   const apiKey = process.env.RIOT_API_KEY

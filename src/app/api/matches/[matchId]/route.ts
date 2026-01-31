@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
  * 매치 상세 정보 조회 (Server-side with long caching)
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: { matchId: string } }
 ) {
   const apiKey = process.env.RIOT_API_KEY
