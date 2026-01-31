@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useMatch } from '@/shared/lib'
 import { normalizeMatch } from '@/features/analysis/normalizer'
@@ -12,7 +13,10 @@ interface MatchReportPageProps {
   }
 }
 
-export default function MatchReportPage({ params }: MatchReportPageProps) {
+// 동적 렌더링 강제 (쿼리 파라미터 의존)
+export const dynamic = 'force-dynamic'
+
+function MatchReportContent({ params }: MatchReportPageProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const puuid = searchParams.get('puuid')
@@ -169,5 +173,24 @@ export default function MatchReportPage({ params }: MatchReportPageProps) {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function MatchReportPage({ params }: MatchReportPageProps) {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen p-4 sm:p-8 bg-gray-900">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gray-800 rounded-lg shadow-lg p-8 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-300">로딩 중...</p>
+            </div>
+          </div>
+        </main>
+      }
+    >
+      <MatchReportContent params={params} />
+    </Suspense>
   )
 }
