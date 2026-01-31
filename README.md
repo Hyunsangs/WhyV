@@ -1,4 +1,4 @@
-# Why TFT
+# WhyV
 
 TFT(Teamfight Tactics) 포스트게임 분석 서비스
 
