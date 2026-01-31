@@ -1,4 +1,5 @@
-import { useSummonerByPuuid } from '@/shared/lib/queries'
+import { useSummonerByPuuid, useDdragonVersion } from '@/shared/lib/queries'
+import { FALLBACK_DDRAGON_VERSION } from '@/shared/lib/tft-assets'
 
 interface ProfileHeaderProps {
   puuid: string
@@ -10,6 +11,8 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ puuid, gameName, tagLine, onRefresh, isRefreshing }: ProfileHeaderProps) {
   const { data: summonerData, isLoading: isSummonerLoading } = useSummonerByPuuid(puuid)
+  const { data: versionData } = useDdragonVersion()
+  const ddragonVersion = versionData?.version ?? FALLBACK_DDRAGON_VERSION
 
   return (
     <div className="bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 mb-6 text-white">
@@ -21,9 +24,10 @@ export function ProfileHeader({ puuid, gameName, tagLine, onRefresh, isRefreshin
           ) : (
             <>
               <img
-                src={`https://ddragon.leagueoflegends.com/cdn/16.2.1/img/profileicon/${summonerData?.profileIconId || 0}.png`}
+                src={`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${summonerData?.profileIconId || 0}.png`}
                 alt="프로필 아이콘"
                 className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-gray-700"
+                referrerPolicy="no-referrer"
               />
               <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gray-700 px-2 sm:px-3 py-1 rounded-full text-xs font-bold">
                 {summonerData?.summonerLevel || 0}
@@ -50,9 +54,8 @@ export function ProfileHeader({ puuid, gameName, tagLine, onRefresh, isRefreshin
         <button
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-600 rounded-lg font-semibold transition flex items-center justify-center gap-2 disabled:cursor-not-allowed text-sm sm:text-base"
+          className="min-h-[44px] w-full sm:w-auto px-4 sm:px-6 py-3 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 disabled:bg-gray-600 rounded-lg font-semibold transition flex items-center justify-center gap-2 disabled:cursor-not-allowed text-sm sm:text-base"
         >
-          <span>🔄</span>
           <span>{isRefreshing ? '갱신 중...' : '전적 갱신'}</span>
         </button>
       </div>

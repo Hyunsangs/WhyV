@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { useMatch } from '@/shared/lib'
 import { normalizeMatch } from '@/features/analysis/normalizer'
 import { analyzeMatch, getTopAction } from '@/features/analysis'
-import { AnalysisCard, PlacementBadge } from '@/shared/ui'
+import { AnalysisCard, ChampionIcon, PlacementBadge } from '@/shared/ui'
 
 interface MatchReportPageProps {
   params: {
@@ -29,8 +29,9 @@ function MatchReportContent({ params }: MatchReportPageProps) {
       <main className="min-h-screen p-4 sm:p-8 bg-gray-900">
         <div className="max-w-4xl mx-auto">
           <button
+            type="button"
             onClick={() => router.back()}
-            className="text-blue-400 hover:text-blue-300 mb-4"
+            className="min-h-[44px] min-w-[44px] py-2 px-3 -ml-2 text-blue-400 hover:text-blue-300 active:text-blue-200 mb-4 inline-flex items-center justify-center"
           >
             ← 돌아가기
           </button>
@@ -44,11 +45,33 @@ function MatchReportContent({ params }: MatchReportPageProps) {
 
   if (matchQuery.isLoading) {
     return (
-      <main className="min-h-screen p-4 sm:p-8 bg-gray-900">
+      <main className="min-h-screen p-4 sm:p-8 bg-gray-900" aria-busy="true" aria-label="매치 분석 로딩 중">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-gray-300">매치를 분석하는 중...</p>
+          <div className="min-h-[44px] mb-6 h-10 w-32 rounded bg-gray-800 animate-pulse" />
+          <div className="bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 mb-6 animate-pulse">
+            <div className="h-8 bg-gray-700 rounded w-2/3 mb-4" />
+            <div className="h-4 bg-gray-700 rounded w-full mb-2" />
+            <div className="h-4 bg-gray-700 rounded w-1/2" />
+          </div>
+          <div className="rounded-lg p-4 sm:p-6 mb-6 bg-gray-800 animate-pulse">
+            <div className="h-6 bg-gray-700 rounded w-1/3 mb-3" />
+            <div className="h-4 bg-gray-700 rounded w-full" />
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex flex-col items-center p-2 rounded-lg bg-gray-800 animate-pulse">
+                <div className="w-14 h-14 rounded-lg bg-gray-700" />
+                <div className="mt-2 h-3 bg-gray-700 rounded w-full" />
+              </div>
+            ))}
+          </div>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="border border-gray-700 bg-gray-800 rounded-lg p-4 animate-pulse">
+                <div className="h-4 bg-gray-700 rounded w-1/4 mb-2" />
+                <div className="h-4 bg-gray-700 rounded w-full" />
+              </div>
+            ))}
           </div>
         </div>
       </main>
@@ -60,8 +83,9 @@ function MatchReportContent({ params }: MatchReportPageProps) {
       <main className="min-h-screen p-4 sm:p-8 bg-gray-900">
         <div className="max-w-4xl mx-auto">
           <button
+            type="button"
             onClick={() => router.back()}
-            className="text-blue-400 hover:text-blue-300 mb-4"
+            className="min-h-[44px] min-w-[44px] py-2 px-3 -ml-2 text-blue-400 hover:text-blue-300 active:text-blue-200 mb-4 inline-flex items-center justify-center"
           >
             ← 돌아가기
           </button>
@@ -86,13 +110,16 @@ function MatchReportContent({ params }: MatchReportPageProps) {
   const analysisResult = analyzeMatch(normalized, puuid)
   const topAction = getTopAction(analysisResult.causes)
   const isWin = analysisResult.placement <= 4
+  const myParticipant = matchQuery.data.info.participants.find((p) => p.puuid === puuid)
+  const myUnits = myParticipant?.units ?? []
 
   return (
     <main className="min-h-screen p-4 sm:p-8 bg-gray-900">
       <div className="max-w-4xl mx-auto">
         <button
+          type="button"
           onClick={() => router.back()}
-          className="text-blue-400 hover:text-blue-300 mb-4"
+          className="min-h-[44px] min-w-[44px] py-2 px-3 -ml-2 text-blue-400 hover:text-blue-300 active:text-blue-200 mb-4 inline-flex items-center justify-center"
         >
           ← 돌아가기
         </button>
@@ -128,6 +155,37 @@ function MatchReportContent({ params }: MatchReportPageProps) {
           </p>
         </div>
 
+        {/* 최종 덱 (유닛 목록 + 이미지) */}
+        {myUnits.length > 0 && (
+          <div className="bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 mb-6">
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-3">최종 덱</h3>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4">
+              {myUnits.map((unit, index) => (
+                <div
+                  key={`${unit.character_id}-${index}`}
+                  className="flex flex-col items-center p-2 rounded-lg bg-gray-700/50 border border-gray-600"
+                >
+                  <ChampionIcon
+                    characterId={unit.character_id}
+                    name={unit.name}
+                    size={56}
+                    star={unit.tier}
+                    tftSet={matchQuery.data.info.tft_set_number}
+                  />
+                  <p className="mt-1 text-xs font-medium text-gray-200 truncate w-full text-center">
+                    {unit.name}
+                  </p>
+                  {unit.itemNames.length > 0 && (
+                    <p className="text-[10px] text-gray-500 truncate w-full text-center" title={unit.itemNames.join(', ')}>
+                      아이템 {unit.itemNames.length}개
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* TOP3 원인 */}
         {analysisResult.causes.length > 0 && (
           <>
@@ -161,16 +219,21 @@ function MatchReportContent({ params }: MatchReportPageProps) {
           </div>
         )}
 
-        {/* 분석 방법 설명 */}
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 sm:p-6">
-          <h3 className="font-semibold text-white mb-3 text-sm sm:text-base">📋 분석 방법</h3>
-          <ul className="text-xs sm:text-sm text-gray-400 space-y-2">
-            <li>• 모든 분석은 <strong className="text-gray-300">규칙 기반(Heuristic)</strong>으로 수행됩니다</li>
-            <li>• 영향도: <span className="text-red-600">●●●</span> 높음 / <span className="text-orange-500">●●</span> 중간 / <span className="text-yellow-500">●</span> 낮음</li>
-            <li>• 각 결과는 구체적인 <strong className="text-gray-300">근거(Evidence)</strong>와 함께 제공됩니다</li>
-            <li>• TOP 3 원인 + 개선 액션 1개를 제시합니다</li>
-          </ul>
-        </div>
+        {/* 분석 방법 설명 (모바일: 접기, 데스크톱: 펼침) */}
+        <details className="bg-gray-800 border border-gray-700 rounded-lg group">
+          <summary className="list-none cursor-pointer p-4 sm:p-6 min-h-[44px] flex items-center justify-between gap-2 select-none">
+            <h3 className="font-semibold text-white text-sm sm:text-base">📋 분석 방법</h3>
+            <span className="text-gray-500 text-xs after:content-['▼'] group-open:after:content-['▲']" aria-hidden />
+          </summary>
+          <div className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0 border-t border-gray-700 md:border-t-0 md:pt-0">
+            <ul className="text-xs sm:text-sm text-gray-400 space-y-2 mt-3 md:mt-0">
+              <li>• 모든 분석은 <strong className="text-gray-300">규칙 기반(Heuristic)</strong>으로 수행됩니다</li>
+              <li>• 영향도: <span className="text-red-600">●●●</span> 높음 / <span className="text-orange-500">●●</span> 중간 / <span className="text-yellow-500">●</span> 낮음</li>
+              <li>• 각 결과는 구체적인 <strong className="text-gray-300">근거(Evidence)</strong>와 함께 제공됩니다</li>
+              <li>• TOP 3 원인 + 개선 액션 1개를 제시합니다</li>
+            </ul>
+          </div>
+        </details>
       </div>
     </main>
   )
@@ -180,11 +243,19 @@ export default function MatchReportPage({ params }: MatchReportPageProps) {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen p-4 sm:p-8 bg-gray-900">
+        <main className="min-h-screen p-4 sm:p-8 bg-gray-900" aria-busy="true">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-gray-300">로딩 중...</p>
+            <div className="min-h-[44px] mb-6 h-10 w-32 rounded bg-gray-800 animate-pulse" />
+            <div className="bg-gray-800 rounded-lg p-4 sm:p-6 mb-6 animate-pulse">
+              <div className="h-8 bg-gray-700 rounded w-2/3 mb-4" />
+              <div className="h-4 bg-gray-700 rounded w-full" />
+            </div>
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="rounded-lg p-2 bg-gray-800 animate-pulse">
+                  <div className="w-full aspect-square rounded-lg bg-gray-700" />
+                </div>
+              ))}
             </div>
           </div>
         </main>

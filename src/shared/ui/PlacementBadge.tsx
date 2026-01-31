@@ -27,7 +27,7 @@ export function PlacementBadge({ placement }: PlacementBadgeProps) {
   const styleClass = getPlacementStyle(placement)
   
   return (
-    <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full font-bold ${styleClass}`}>
+    <div className={`inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full font-bold text-sm sm:text-base ${styleClass}`}>
       {placement}
     </div>
   )

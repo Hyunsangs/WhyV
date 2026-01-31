@@ -36,7 +36,7 @@ const SCORE_COLORS: Record<1 | 2 | 3, string> = {
 
 export function AnalysisCard({ cause }: AnalysisCardProps) {
   return (
-    <div className="border border-gray-700 bg-gray-800 rounded-lg p-4 hover:shadow-lg hover:border-gray-600 transition">
+    <div className="border border-gray-700 bg-gray-800 rounded-lg p-4 hover:shadow-lg hover:border-gray-600 focus-within:ring-2 focus-within:ring-blue-500 transition">
       <div className="flex items-start justify-between mb-2">
         <span className={`text-xs px-2 py-1 rounded ${CATEGORY_COLORS[cause.category]}`}>
           {CATEGORY_LABELS[cause.category]}
