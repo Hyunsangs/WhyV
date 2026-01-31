@@ -1,12 +1,13 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query'
 import { fetchSummonerByRiotId, fetchMatchIdsByPuuid, fetchMatchById } from '@/shared/lib'
 import { MatchListItem, ProfileHeader } from '@/shared/ui'
 import type { MatchSummary } from '@/shared/types/analysis'
 
-export default function MatchesPage() {
+function MatchesContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -157,5 +158,24 @@ export default function MatchesPage() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function MatchesPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen p-4 sm:p-8 bg-gray-900">
+          <div className="max-w-6xl mx-auto">
+            <div className="bg-gray-800 rounded-lg shadow-lg p-8 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-300">로딩 중...</p>
+            </div>
+          </div>
+        </main>
+      }
+    >
+      <MatchesContent />
+    </Suspense>
   )
 }
