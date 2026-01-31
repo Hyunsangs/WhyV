@@ -54,3 +54,14 @@ export async function fetchMatchById(matchId: string): Promise<RiotMatchData> {
   
   return response.json()
 }
+
+export async function fetchDdragonVersion(): Promise<{ version: string }> {
+  const response = await fetch('/api/ddragon/version')
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || 'Failed to fetch DDragon version')
+  }
+
+  return response.json()
+}

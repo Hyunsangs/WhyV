@@ -1,9 +1,10 @@
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
-import { 
-  fetchSummonerByRiotId, 
+import {
+  fetchSummonerByRiotId,
   fetchSummonerByPuuid,
-  fetchMatchIdsByPuuid, 
-  fetchMatchById 
+  fetchMatchIdsByPuuid,
+  fetchMatchById,
+  fetchDdragonVersion,
 } from './api-client'
 
 /**
@@ -51,5 +52,14 @@ export function useMatchSuspense(matchId: string) {
     queryKey: ['tft', 'match', matchId],
     queryFn: () => fetchMatchById(matchId),
     staleTime: 10 * 60 * 1000,
+  })
+}
+
+export function useDdragonVersion() {
+  return useQuery({
+    queryKey: ['ddragon', 'version'],
+    queryFn: () => fetchDdragonVersion(),
+    staleTime: 86400 * 1000, // 24시간
+    gcTime: 86400 * 1000,
   })
 }
