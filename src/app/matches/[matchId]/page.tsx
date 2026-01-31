@@ -1,0 +1,173 @@
+'use client'
+
+import { useSearchParams, useRouter } from 'next/navigation'
+import { useMatch } from '@/shared/lib'
+import { normalizeMatch } from '@/features/analysis/normalizer'
+import { analyzeMatch, getTopAction } from '@/features/analysis'
+import { AnalysisCard, PlacementBadge } from '@/shared/ui'
+
+interface MatchReportPageProps {
+  params: {
+    matchId: string
+  }
+}
+
+export default function MatchReportPage({ params }: MatchReportPageProps) {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const puuid = searchParams.get('puuid')
+
+  // TanStack Query로 매치 데이터 가져오기
+  const matchQuery = useMatch(params.matchId)
+
+  if (!puuid) {
+    return (
+      <main className="min-h-screen p-4 sm:p-8 bg-gray-900">
+        <div className="max-w-4xl mx-auto">
+          <button
+            onClick={() => router.back()}
+            className="text-blue-400 hover:text-blue-300 mb-4"
+          >
+            ← 돌아가기
+          </button>
+          <div className="bg-red-900/50 border border-red-700 rounded-lg p-6">
+            <p className="text-red-200">유효하지 않은 요청입니다.</p>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (matchQuery.isLoading) {
+    return (
+      <main className="min-h-screen p-4 sm:p-8 bg-gray-900">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gray-800 rounded-lg shadow-lg p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-300">매치를 분석하는 중...</p>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (matchQuery.error) {
+    return (
+      <main className="min-h-screen p-4 sm:p-8 bg-gray-900">
+        <div className="max-w-4xl mx-auto">
+          <button
+            onClick={() => router.back()}
+            className="text-blue-400 hover:text-blue-300 mb-4"
+          >
+            ← 돌아가기
+          </button>
+          <div className="bg-red-900/50 border border-red-700 rounded-lg p-6">
+            <p className="text-red-200">
+              {matchQuery.error instanceof Error
+                ? matchQuery.error.message
+                : '매치 분석에 실패했습니다.'}
+            </p>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (!matchQuery.data) {
+    return null
+  }
+
+  // 분석 수행 (클라이언트 사이드 계산)
+  const normalized = normalizeMatch(matchQuery.data)
+  const analysisResult = analyzeMatch(normalized, puuid)
+  const topAction = getTopAction(analysisResult.causes)
+  const isWin = analysisResult.placement <= 4
+
+  return (
+    <main className="min-h-screen p-4 sm:p-8 bg-gray-900">
+      <div className="max-w-4xl mx-auto">
+        <button
+          onClick={() => router.back()}
+          className="text-blue-400 hover:text-blue-300 mb-4"
+        >
+          ← 돌아가기
+        </button>
+
+        {/* 헤더 */}
+        <div className="bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">매치 분석 리포트</h1>
+            <PlacementBadge placement={analysisResult.placement} />
+          </div>
+
+          <div className="text-sm text-gray-400 space-y-1">
+            <p className="break-all">Match ID: {analysisResult.matchId}</p>
+            <p>분석 시각: {new Date(analysisResult.analyzedAt).toLocaleString('ko-KR')}</p>
+          </div>
+
+          {matchQuery.isFetching && (
+            <div className="mt-2 text-sm text-blue-400">
+              🔄 백그라운드에서 업데이트 중...
+            </div>
+          )}
+        </div>
+
+        {/* 결과 요약 */}
+        <div className={`rounded-lg p-4 sm:p-6 mb-6 ${isWin ? 'bg-green-900/30 border border-green-700' : 'bg-orange-900/30 border border-orange-700'}`}>
+          <h2 className={`text-xl sm:text-2xl font-bold mb-2 ${isWin ? 'text-green-400' : 'text-orange-400'}`}>
+            {isWin ? '🎉 승리 분석' : '📊 패배 원인 분석'}
+          </h2>
+          <p className={`text-sm sm:text-base ${isWin ? 'text-green-300' : 'text-orange-300'}`}>
+            {analysisResult.causes.length > 0 
+              ? `${analysisResult.causes.length}개의 주요 원인이 발견되었습니다.`
+              : '분석 가능한 특이사항이 없습니다. 전반적으로 안정적인 플레이였습니다.'}
+          </p>
+        </div>
+
+        {/* TOP3 원인 */}
+        {analysisResult.causes.length > 0 && (
+          <>
+            <div className="mb-4">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-3">주요 원인 TOP 3</h3>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              {analysisResult.causes.map((cause, index) => (
+                <div key={`${cause.code}_${index}`} className="relative">
+                  <div className="absolute -left-2 sm:-left-3 top-3 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
+                    {index + 1}
+                  </div>
+                  <AnalysisCard cause={cause} />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* 다음 판 액션 */}
+        {topAction && (
+          <div className="bg-blue-900/30 border-2 border-blue-700 rounded-lg p-4 sm:p-6 mb-6">
+            <h3 className="text-lg sm:text-xl font-bold text-blue-400 mb-3 flex items-center gap-2">
+              <span>💡</span>
+              <span>다음 판 개선 포인트</span>
+            </h3>
+            <div className="bg-gray-800 rounded p-4 border border-blue-800">
+              <p className="text-blue-300 font-medium text-sm sm:text-base">{topAction.message}</p>
+            </div>
+          </div>
+        )}
+
+        {/* 분석 방법 설명 */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 sm:p-6">
+          <h3 className="font-semibold text-white mb-3 text-sm sm:text-base">📋 분석 방법</h3>
+          <ul className="text-xs sm:text-sm text-gray-400 space-y-2">
+            <li>• 모든 분석은 <strong className="text-gray-300">규칙 기반(Heuristic)</strong>으로 수행됩니다</li>
+            <li>• 영향도: <span className="text-red-600">●●●</span> 높음 / <span className="text-orange-500">●●</span> 중간 / <span className="text-yellow-500">●</span> 낮음</li>
+            <li>• 각 결과는 구체적인 <strong className="text-gray-300">근거(Evidence)</strong>와 함께 제공됩니다</li>
+            <li>• TOP 3 원인 + 개선 액션 1개를 제시합니다</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  )
+}
