@@ -1,4 +1,5 @@
 export { AnalysisCard } from './AnalysisCard'
-export { PlacementBadge } from './PlacementBadge'
+export { ChampionIcon } from './ChampionIcon'
 export { MatchListItem } from './MatchListItem'
+export { PlacementBadge } from './PlacementBadge'
 export { ProfileHeader } from './ProfileHeader'

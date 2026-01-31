@@ -178,6 +178,13 @@ export interface AnalysisResult {
 /**
  * 매치 요약 정보 (목록 표시용)
  */
+/** 매치 목록 아이템에서 유닛 표시용 (최종 덱) */
+export interface MatchSummaryUnit {
+  character_id: string
+  name: string
+  tier: number
+}
+
 export interface MatchSummary {
   matchId: string
   placement: number
@@ -186,6 +193,8 @@ export interface MatchSummary {
   tftSet: number
   level: number
   totalDamage: number
+  /** 해당 플레이어 최종 덱 (매치 목록에서 op.gg 스타일 표시용) */
+  units: MatchSummaryUnit[]
 }
 
 /**
