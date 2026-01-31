@@ -67,12 +67,13 @@ export default function HomePage() {
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isSearching}
-              className="flex-1 px-4 py-2 sm:py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder:text-gray-500 bg-gray-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+              className="flex-1 min-h-[44px] px-4 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder:text-gray-500 bg-gray-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
             />
-            <button 
+            <button
+              type="button"
               onClick={handleSearch}
               disabled={isSearching}
-              className="px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-gray-600 disabled:cursor-not-allowed font-medium whitespace-nowrap"
+              className="min-h-[44px] px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition disabled:bg-gray-600 disabled:cursor-not-allowed font-medium whitespace-nowrap"
             >
               {isSearching ? '검색 중...' : '검색'}
             </button>

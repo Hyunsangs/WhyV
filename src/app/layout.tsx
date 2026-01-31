@@ -5,6 +5,7 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Why TFT - 전략적 팀 전투 분석',
   description: 'TFT 포스트게임 분석 서비스',
+  referrer: 'no-referrer',
 }
 
 export default function RootLayout({
